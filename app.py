@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 import alpaca_trade_api as tradeapi
 import config, json, requests
 
@@ -14,7 +14,12 @@ def dashboard():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
-        webhook_message = json.loads(request.data)
+        raw_payload = request.get_data(as_text=True)
+        
+        # Log the raw payload received from TradingView
+        print("Raw Payload:", raw_payload)
+        
+        webhook_message = json.loads(raw_payload)
         
         if webhook_message['passphrase'] != config.WEBHOOK_PASSPHRASE:
             return jsonify({
