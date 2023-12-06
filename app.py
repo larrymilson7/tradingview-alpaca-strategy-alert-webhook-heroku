@@ -23,7 +23,7 @@ def webhook():
         }
     
     price = webhook_message['strategy']['order_price']
-    quantity = webhook_message['4']
+    quantity = 4
     symbol = webhook_message['ticker']
     side = webhook_message['strategy']['order_action']
     
