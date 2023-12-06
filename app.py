@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import alpaca_trade_api as tradeapi
 import config, json, requests
 
@@ -9,7 +9,6 @@ api = tradeapi.REST(config.API_KEY, config.API_SECRET, base_url='https://paper-a
 @app.route('/')
 def dashboard():
     orders = api.list_orders()
-    
     return render_template('dashboard.html', alpaca_orders=orders)
 
 @app.route('/webhook', methods=['POST'])
@@ -17,26 +16,29 @@ def webhook():
     webhook_message = json.loads(request.data)
 
     if webhook_message['passphrase'] != config.WEBHOOK_PASSPHRASE:
-        return {
+        return jsonify({
             'code': 'error',
-            'message': 'nice try buddy'
-        }
+            'message': 'Nice try buddy'
+        })
     
     price = webhook_message['strategy']['order_price']
-    quantity = 4
     symbol = webhook_message['ticker']
     side = webhook_message['strategy']['order_action']
     
+    quantity = 4  # Set the quantity to 4 contracts or any fixed value you prefer
+    
     order = api.submit_order(symbol, quantity, side, 'limit', 'gtc', limit_price=price)
 
-    # if a DISCORD URL is set in the config file, we will post to the discord webhook
     if config.DISCORD_WEBHOOK_URL:
         chat_message = {
             "username": "strategyalert",
             "avatar_url": "https://i.imgur.com/4M34hi2.png",
-            "content": f"tradingview strategy alert triggered: {quantity} {symbol} @ {price}"
+            "content": f"TradingView strategy alert triggered: {quantity} {symbol} @ {price}"
         }
 
         requests.post(config.DISCORD_WEBHOOK_URL, json=chat_message)
 
-    return webhook_message
+    return jsonify(webhook_message)
+
+if __name__ == "__main__":
+    app.run()
