@@ -22,21 +22,25 @@ def webhook():
             'message': 'nice try buddy'
         }
     
-    price = webhook_message['strategy']['order_price']
-    quantity = 4
+    price = float(webhook_message['strategy']['order_price'])  # Convert to float if needed
+    rounded_price = round(price, 2)  # Round price to 2 decimal places
+    quantity = webhook_message['strategy']['order_contracts']
     symbol = webhook_message['ticker']
     side = webhook_message['strategy']['order_action']
     
-    order = api.submit_order(symbol, quantity, side, 'limit', 'gtc', limit_price=price)
+    order = api.submit_order(symbol, quantity, side, 'limit', 'gtc', limit_price=rounded_price)  # Use rounded_price here
 
     # if a DISCORD URL is set in the config file, we will post to the discord webhook
     if config.DISCORD_WEBHOOK_URL:
         chat_message = {
             "username": "strategyalert",
             "avatar_url": "https://i.imgur.com/4M34hi2.png",
-            "content": f"tradingview strategy alert triggered: {quantity} {symbol} @ {price}"
+            "content": f"tradingview strategy alert triggered: {quantity} {symbol} @ {rounded_price}"  # Use rounded_price here
         }
 
         requests.post(config.DISCORD_WEBHOOK_URL, json=chat_message)
 
     return webhook_message
+
+if __name__ == '__main__':
+    app.run(debug=True)
