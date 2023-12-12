@@ -38,3 +38,6 @@ def webhook():
         requests.post(config.DISCORD_WEBHOOK_URL, json=chat_message)
 
     return webhook_message
+
+if __name__ == '__main__':
+    app.run(debug=True)
