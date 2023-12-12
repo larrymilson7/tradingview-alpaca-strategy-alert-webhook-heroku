@@ -9,7 +9,6 @@ api = tradeapi.REST(config.API_KEY, config.API_SECRET, base_url='https://paper-a
 @app.route('/')
 def dashboard():
     orders = api.list_orders()
-    
     return render_template('dashboard.html', alpaca_orders=orders)
 
 @app.route('/webhook', methods=['POST'])
@@ -22,19 +21,18 @@ def webhook():
             'message': 'nice try buddy'
         }
     
-    price = webhook_message['strategy']['order_price']
     quantity = webhook_message['strategy']['order_contracts']
     symbol = webhook_message['ticker']
     side = webhook_message['strategy']['order_action']
     
-    order = api.submit_order(symbol, quantity, side, 'limit', 'gtc', limit_price=price)
+    order = api.submit_order(symbol, quantity, side, 'market', 'gtc')
 
     # if a DISCORD URL is set in the config file, we will post to the discord webhook
     if config.DISCORD_WEBHOOK_URL:
         chat_message = {
             "username": "strategyalert",
             "avatar_url": "https://i.imgur.com/4M34hi2.png",
-            "content": f"tradingview strategy alert triggered: {quantity} {symbol} @ {price}"
+            "content": f"tradingview strategy alert triggered: {quantity} {symbol} - Market Order"
         }
 
         requests.post(config.DISCORD_WEBHOOK_URL, json=chat_message)
