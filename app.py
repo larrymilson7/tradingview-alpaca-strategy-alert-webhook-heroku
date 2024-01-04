@@ -23,7 +23,7 @@ def webhook():
             'message': 'nice try buddy'
         }
 
-    quantity = webhook_message['strategy']['order_contracts']
+    quantity = int(webhook_message['strategy']['order_contracts'])
     symbol = webhook_message['ticker']
     side = webhook_message['strategy']['order_action']
 
