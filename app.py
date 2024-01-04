@@ -11,9 +11,9 @@ def close_positions(symbol, current_side):
     for position in positions:
         if position.symbol == symbol:
             if int(position.qty) > 0 and current_side == 'sell':
-                api.submit_order(symbol, abs(int(position.qty)), 'sell', 'market', 'gtc')
+                api.submit_order(symbol, abs(int(position.qty - positions)), 'sell', 'market', 'gtc')
             elif int(position.qty) < 0 and current_side == 'buy':
-                api.submit_order(symbol, abs(int(position.qty)), 'buy', 'market', 'gtc')
+                api.submit_order(symbol, abs(int(position.qty - positions)), 'buy', 'market', 'gtc')
 
 @app.route('/')
 def dashboard():
